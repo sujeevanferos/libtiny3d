@@ -6,7 +6,7 @@
 
 
 
-void clear_canvas();
+void default_canvas();
 void set_pixel(int y, int x, char ch);
 void render_canvas();
 
