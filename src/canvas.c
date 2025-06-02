@@ -1,34 +1,19 @@
-#include "../include/canvas.h"
 #include <stdio.h>
 
-char canvas[HEIGHT][WIDTH+1];
+#define HEIGHT 20
+#define WIDTH 30
 
-void clear_canvas()
-{
-  for(int j = 0; j < HEIGHT; j++)
-  {
-    for(int i = 0; i < WIDTH; i++)
-    {
-      canvas[j][i] = '.';
-    }
-    canvas[j][WIDTH] = '\0';
-  }
+char canvas[HEIGHT][WIDTH]
+
+void default_canvas() {
+	for(int i  = 0; i < HEIGHT; i++){
+		for (int j = 0; j < WIDTH; j++){
+			canvas[i][j] = '. ';
+		}
+	}
 }
 
 void render_canvas()
 {
-  for(int y = 0; y < HEIGHT; y++)
-  {
-    printf("%s", canvas[y]);
-  }
+
 }
-
-void set_pixel(int y, int x, char ch)
-{
-  if(x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-  {
-    canvas[y][x] = ch;
-  }
-}
-
-
