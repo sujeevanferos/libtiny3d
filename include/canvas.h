@@ -4,7 +4,6 @@
 typedef struct {
     int height;
     int width;
-    // creating a 2D array
     float **pixels;
 } canvas_t;
 

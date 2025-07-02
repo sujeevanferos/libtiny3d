@@ -1,8 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#define _USE_MATH_DEFINES
 #include <math.h>
-
 #include "../include/canvas.h"
 
 
@@ -78,7 +76,5 @@ void draw_line_f (canvas_t* canvas, float x0, float y0, float x1, float y1, floa
             set_pixel_f(canvas, px, py, 1.0f);
         }
     }
-
-
 
 }

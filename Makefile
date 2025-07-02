@@ -1,6 +1,8 @@
 CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -O2
-SRC = src/canvas.c demo/main.c
+SRC = src/canvas.c demo/main.c src/math3d.c
+TESTS = tests/test_math.c
+TEST_OUT = tests/test_math
 OUT = demo/demo
 
 all: $(OUT)
@@ -8,5 +10,7 @@ all: $(OUT)
 $(OUT): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $(OUT) -lm
 
+test_math: src/math3d.c tests/test_math.c
+	$(CC) $(CFLAGS) -o $(TEST_OUT) tests/test_math.c src/math3d.c -lm
 clean:
-	rm -f $(OUT) canvas_output.pgm
+	rm -f $(OUT) $(TEST_OUT)
