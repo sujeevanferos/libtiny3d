@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Iinclude -Wall -Wextra -O2
-SRC = src/canvas.c demo/main.c src/math3d.c
+SRC = src/canvas.c src/math3d.c src/renderer.c demo/main.c
 TESTS = tests/test_math.c
 TEST_OUT = tests/test_math
 OUT = demo/demo
