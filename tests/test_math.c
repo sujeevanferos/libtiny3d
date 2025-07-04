@@ -1,18 +1,74 @@
 #include <stdio.h>
+#include <math.h>
+
+#include "../include/canvas.h"
 #include "../include/math3d.h"
 
-int main(){
-    vec3_t a = vec3_from_cartesian(1, 0, 0);
-    vec3_t b = vec3_from_cartesian(0, 1, 0);
+#define WIDTH 400
+#define HEIGHT 400
 
-    printf("A: (%.2f, %.2f, %.2f)\n", a.x, a.y, a.z);
-    printf("B: (%.2f, %.2f, %.2f)\n", b.x, b.y, b.z);
+int main() {
+    canvas_t* canvas = create_canvas(WIDTH, HEIGHT);
 
-    for (float t = 0; t <= 1.0f; t += 0.2f){
-        vec3_t c = vec3_slerp(a, b, t);
-        printf("t=%.1f -> (%.2f, %.2f, %.2f)\n", t, c.x, c.y, c.z);
+    // Define cube vertices (unit cube at origin)
+    vec3_t cube[8] = {
+        vec3_from_cartesian(-1, -1, -1),
+        vec3_from_cartesian( 1, -1, -1),
+        vec3_from_cartesian( 1,  1, -1),
+        vec3_from_cartesian(-1,  1, -1),
+        vec3_from_cartesian(-1, -1,  1),
+        vec3_from_cartesian( 1, -1,  1),
+        vec3_from_cartesian( 1,  1,  1),
+        vec3_from_cartesian(-1,  1,  1)
+    };
+
+    // Create transformation matrix: scale → rotate → translate
+    mat4_t model = mat4_mul(
+        mat4_translate(0.0f, 0.0f, 0.0f),
+        mat4_mul(
+            mat4_rotate_xyz(0.4f, 0.8f, 0.2f),
+            mat4_scale(0.5f, 0.5f, 0.5f)
+        )
+    );
+
+    // Project and store 2D points
+    float projected_x[8], projected_y[8];
+
+    for (int i = 0; i < 8; i++) {
+        vec3_t p = mat4_mul_vec3(model, cube[i]);
+
+        // Simple orthographic projection to canvas space
+        projected_x[i] = (p.x + 1.0f) * 0.5f * WIDTH;
+        projected_y[i] = (1.0f - p.y) * 0.5f * HEIGHT;
+
+        set_pixel_f(canvas, projected_x[i], projected_y[i], 1.0f);
     }
 
-    return 0;
+    // Cube edges
+    int edges[12][2] = {
+        {0, 1}, {1, 2}, {2, 3}, {3, 0},
+        {4, 5}, {5, 6}, {6, 7}, {7, 4},
+        {0, 4}, {1, 5}, {2, 6}, {3, 7}
+    };
 
+    for (int i = 0; i < 12; i++) {
+        int a = edges[i][0];
+        int b = edges[i][1];
+        draw_line_f(canvas, projected_x[a], projected_y[a], projected_x[b], projected_y[b], 1.0f);
+    }
+
+    // Write output to PGM file
+    FILE* f = fopen("test_math_output.pgm", "w");
+    fprintf(f, "P2\n%d %d\n255\n", WIDTH, HEIGHT);
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            int val = (int)(fminf(canvas->pixels[y][x], 1.0f) * 255.0f);
+            fprintf(f, "%d ", val);
+        }
+        fprintf(f, "\n");
+    }
+    fclose(f);
+
+    destroy_canvas(canvas);
+    return 0;
 }

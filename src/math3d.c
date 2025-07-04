@@ -1,8 +1,16 @@
-#include "../include/math3d.h"
 #include <math.h>
+#include <stdint.h>
+#include <string.h>
 
-vec3_t vec3_from_cartesian (float x, float y, float z){
-    vec3_t v = {x, y, z, 0.0f, 0.0f, 0.0f};
+#include "../include/math3d.h"
+
+vec3_t vec3_from_cartesian (float x, float y, float z) {
+    vec3_t v;
+
+    v.x = x;
+    v.y = y;
+    v.z = z;
+
     vec3_update_spherical(&v);
     return v;
 }
@@ -31,8 +39,24 @@ void vec3_update_cartesian(vec3_t* v){
 
 }
 
-vec3_t vec3_normalize_fast(vec3_t v){
-    float inv_len = 1.0f / sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+vec3_t vec3_normalize_fast(vec3_t v) {
+    float length_squared = v.x * v.x + v.y * v.y + v.z * v.z;
+    float y = length_squared;
+    int32_t i;
+
+    // Safe float -> int bit reinterpretation
+    memcpy(&i, &y, sizeof(float));
+
+    i = 0x5f3759df - (i >> 1);  // Fast inverse square root magic
+
+    // Safe int -> float bit reinterpretation
+    memcpy(&y, &i, sizeof(float));
+
+    // One Newton-Raphson iteration to improve accuracy
+    y = y * (1.5f - 0.5f * length_squared * y * y);
+
+    float inv_len = y;
+
     v.x *= inv_len;
     v.y *= inv_len;
     v.z *= inv_len;
@@ -51,13 +75,102 @@ vec3_t vec3_slerp(vec3_t a, vec3_t b, float t) {
     float w1 = sinf((1-t) * theta) / sin_theta;
     float w2 = sinf(t * theta) / sin_theta;
 
-    vec3_t result = {
-        w1 * a.x + w2 * b.x, 
-        w1 * a.y + w2 * b.y,
-        w1 * a.z + w2 * b.z,
-        0.0f, 0.0f, 0.0f
-    };
+    vec3_t result;
+    result.x = w1 * a.x + w2 * b.x;
+    result.y = w1 * a.y + w2 * b.y;
+    result.z = w1 * a.z + w2 * b.z;
 
     vec3_update_spherical(&result);
     return result;
 }
+
+mat4_t mat4_identity(){
+    mat4_t m = {0};
+    m.m[0] = m.m[5] = m.m[10] = m.m[15] = 1.0f;
+    return m;
+}
+
+mat4_t mat4_translate(float tx, float ty, float tz){
+    mat4_t m = mat4_identity();
+    m.m[12] = tx;
+    m.m[13] = ty;
+    m.m[14] = tz;
+
+    return m;
+}
+
+mat4_t mat4_scale(float sx, float sy, float sz){
+    mat4_t m = {0};
+    m.m[0] = sx;
+    m.m[5] = sy;
+    m.m[10] = sz;
+    m.m[15] = 1.0f;
+
+    return m;
+}
+
+mat4_t mat4_rotate_xyz(float rx, float ry, float rz){
+    float cx = cosf(rx), sx = sinf(rx);
+    float cy = cosf(ry), sy = sinf(ry);
+    float cz = cosf(rz), sz = sinf(rz);
+
+    mat4_t rotX = mat4_identity();
+    rotX.m[5] = cx; rotX.m[6] = -sx;
+    rotX.m[9] = sx; rotX.m[10] = cx;
+
+    mat4_t rotY = mat4_identity();
+    rotY.m[0] = cy; rotY.m[2] = sy;
+    rotY.m[8] = -sy; rotY.m[10] = cy;
+
+    mat4_t rotZ = mat4_identity();
+    rotZ.m[0] = cz; rotZ.m[1] = -sz;
+    rotZ.m[4] = sz; rotZ.m[5] = cz;
+    
+    mat4_t temp = mat4_mul(rotZ, rotY);
+    return mat4_mul(temp, rotX);
+}
+
+vec3_t mat4_mul_vec3(mat4_t m, vec3_t v){
+    float x = v.x, y = v.y, z = v.z, w = 1.0f;
+
+    float tx = m.m[0]*x + m.m[4]*y + m.m[8]*z + m.m[12]*w;
+    float ty = m.m[1]*x + m.m[5]*y + m.m[9]*z + m.m[13]*w;
+    float tz = m.m[2]*x + m.m[6]*y + m.m[10]*z + m.m[14]*w;
+    float tw = m.m[3]*x + m.m[7]*y + m.m[11]*z + m.m[15]*w;
+
+    if (fabs(tw) > 1e-6f){
+        tx /= tw; 
+        ty /= tw; 
+        tz /= tw;
+    }
+
+    return vec3_from_cartesian(tx, ty, tz);
+}
+
+mat4_t mat4_mul(mat4_t a, mat4_t b){
+    mat4_t r = {0};
+    for (int row = 0; row < 4; ++row){
+        for (int col = 0; col < 4; ++col){
+            for (int i = 0; i < 4; ++i){
+                r.m[col + row*4] += a.m[i + row*4] * b.m[col + i*4];
+            }
+        }
+    }
+
+    return r;
+}
+
+mat4_t mat4_frustum_asymmetric(float l, float r, float b, float t, float n, float f) {
+    mat4_t m = {0};
+
+    m.m[0] = (2.0f * n) / (r - l);
+    m.m[5] = (2.0f * n) / (t - b);
+    m.m[8] = (r + l) / (r - l);
+    m.m[9] = (t + b) / (t - b);
+    m.m[10] = -(f + n) / (f - n);
+    m.m[11] = -1.0f;
+    m.m[14] = -(2.0f * f * n) / (f - n);
+
+    return m;
+}
+

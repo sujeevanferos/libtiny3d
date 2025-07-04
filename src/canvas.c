@@ -57,7 +57,7 @@ void draw_line_f (canvas_t* canvas, float x0, float y0, float x1, float y1, floa
     float dx = x1 - x0;
     float dy = y1 - y0;
 
-    float len = sqrt(dx * dx + dy * dy);
+    float len = sqrtf(dx * dx + dy * dy);
     int steps = (int)ceilf(len * 2);
 
     float step_x = dx/steps;
