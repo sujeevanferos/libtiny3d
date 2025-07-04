@@ -16,10 +16,10 @@ int main(){
         float x = cx + radius * cosf(rad);
         float y = cy + radius * sinf(rad);
 
-        draw_line_f(canvas, cx, cy, x, y, 1.5f);
+        draw_line_f(canvas, cx, cy, x, y, 1.0f);
     }
 
-    FILE *f = fopen("canvas_output.pgm", "wb");
+    FILE *f = fopen("clock_face.pgm", "wb");
     fprintf(f, "P5\n%d %d\n255\n", WIDTH, HEIGHT);
 
     for(int y = 0; y < HEIGHT; y++){

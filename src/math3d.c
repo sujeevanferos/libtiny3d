@@ -1,8 +1,16 @@
-#include "../include/math3d.h"
 #include <math.h>
+#include <stdint.h>
+#include <string.h>
 
-vec3_t vec3_from_cartesian (float x, float y, float z){
-    vec3_t v = {x, y, z, 0.0f, 0.0f, 0.0f};
+#include "../include/math3d.h"
+
+vec3_t vec3_from_cartesian (float x, float y, float z) {
+    vec3_t v;
+
+    v.x = x;
+    v.y = y;
+    v.z = z;
+
     vec3_update_spherical(&v);
     return v;
 }
@@ -31,8 +39,24 @@ void vec3_update_cartesian(vec3_t* v){
 
 }
 
-vec3_t vec3_normalize_fast(vec3_t v){
-    float inv_len = 1.0f / sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+vec3_t vec3_normalize_fast(vec3_t v) {
+    float length_squared = v.x * v.x + v.y * v.y + v.z * v.z;
+    float y = length_squared;
+    int32_t i;
+
+    // Safe float -> int bit reinterpretation
+    memcpy(&i, &y, sizeof(float));
+
+    i = 0x5f3759df - (i >> 1);  // Fast inverse square root magic
+
+    // Safe int -> float bit reinterpretation
+    memcpy(&y, &i, sizeof(float));
+
+    // One Newton-Raphson iteration to improve accuracy
+    y = y * (1.5f - 0.5f * length_squared * y * y);
+
+    float inv_len = y;
+
     v.x *= inv_len;
     v.y *= inv_len;
     v.z *= inv_len;
@@ -51,12 +75,10 @@ vec3_t vec3_slerp(vec3_t a, vec3_t b, float t) {
     float w1 = sinf((1-t) * theta) / sin_theta;
     float w2 = sinf(t * theta) / sin_theta;
 
-    vec3_t result = {
-        .x = w1 * a.x + w2 * b.x, 
-        .y = w1 * a.y + w2 * b.y,
-        .z = w1 * a.z + w2 * b.z,
-        .r = 0.0f, .theta = 0.0f, .phi = 0.0f
-    };
+    vec3_t result;
+    result.x = w1 * a.x + w2 * b.x;
+    result.y = w1 * a.y + w2 * b.y;
+    result.z = w1 * a.z + w2 * b.z;
 
     vec3_update_spherical(&result);
     return result;
