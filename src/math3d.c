@@ -116,7 +116,7 @@ vec3_t mat4_mul_vec3(mat4_t m, vec3_t v){
     float tz = m.m[2]*x + m.m[6]*y + m.m[10]*z + m.m[14]*w;
     float tw = m.m[3]*x + m.m[7]*y + m.m[11]*z + m.m[15]*w;
 
-    if (tw != 0.0f){
+    if (fabs(tw) > 1e-6f){
         tx /= tw; 
         ty /= tw; 
         tz /= tw;
@@ -127,9 +127,9 @@ vec3_t mat4_mul_vec3(mat4_t m, vec3_t v){
 
 mat4_t mat4_mul(mat4_t a, mat4_t b){
     mat4_t r = {0};
-    for (int row = 0; row < 4; row++){
-        for (int col = 0; col < 4; col++){
-            for (int i = 0; i < 4; i++){
+    for (int row = 0; row < 4; ++row){
+        for (int col = 0; col < 4; ++col){
+            for (int i = 0; i < 4; ++i){
                 r.m[col + row*4] += a.m[i + row*4] * b.m[col + i*4];
             }
         }
