@@ -1,0 +1,9 @@
+# Build artifacts
+build/
+
+# Demo PGM output files (if they are in the root of libtiny3d)
+*.pgm
+
+# OS generated files
+.DS_Store
+Thumbs.db
