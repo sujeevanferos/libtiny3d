@@ -151,8 +151,6 @@ run_test_task3_soccer: $(ROTATING_SOCCER_EXE)
 	./$(ROTATING_SOCCER_EXE)
 	@echo "Rotating soccer ball test executed. Check output if applicable."
 
-	
-
 # Target to clean build artifacts
 clean:
 	rm -rf $(BUILD_DIR)

@@ -1,4 +1,3 @@
-// Two roataing soccer balls animated
 #include "../include/renderer.h" 
 #include "../include/animation.h" 
 #include <stdio.h>

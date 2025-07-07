@@ -52,7 +52,7 @@ int main() {
     mat4_t projection_matrix = mat4_perspective(fov_y_rad, aspect_ratio, near_plane, far_plane);
 
     // --- Animation Setup ---
-    int num_frames = 120; // e.g., 4 seconds at 30 FPS
+    int num_frames = 120;
     float total_animation_duration = 4.0f; // Duration for one full loop of everything
     float time_step = total_animation_duration / (float)num_frames;
 

@@ -1,7 +1,7 @@
 #ifndef MATH3D_H
 #define MATH3D_H
 
-#include <math.h> // For sqrtf, atan2f, acosf, sinf, cosf
+#include <math.h>
 
 // Forward declaration for mat4_t if used in vec3_t functions, though not directly here
 // typedef struct mat4_t mat4_t;

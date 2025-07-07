@@ -120,7 +120,7 @@ static int compare_renderable_edges(const void* a, const void* b) {
 }
 
 
-#include "lighting.h" // For lighting calculations
+#include "../include/lighting.h" // For lighting calculations
 
 void render_wireframe(canvas_t* canvas,
                       const model_t* model,
@@ -221,7 +221,7 @@ void render_wireframe(canvas_t* canvas,
 }
 
 
-#include "obj_loader.h" // For obj_load_from_string
+#include "../include/obj_loader.h" // For obj_load_from_string
 
 // Generates a soccer ball model by loading from embedded OBJ data.
 model_t* generate_soccer_ball() {
