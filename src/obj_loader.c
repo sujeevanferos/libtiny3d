@@ -1,5 +1,5 @@
-#include "obj_loader.h"
-#include "math3d.h" // For vec3_create_cartesian
+#include "../include/obj_loader.h"
+#include "../include/math3d.h" // For vec3_create_cartesian
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,4 +1,4 @@
-#include "canvas.h"
+#include "../include/canvas.h"
 #include <stdio.h>  // For FILE operations in canvas_save_to_pgm
 #include <stdlib.h> // For malloc, free
 #include <string.h> // For memset

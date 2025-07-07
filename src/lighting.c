@@ -1,4 +1,4 @@
-#include "lighting.h"
+#include "../include/lighting.h"
 #include <math.h> // For fmaxf
 
 // Dot product helper (already in math3d.c but might not be public, or redefine for clarity)

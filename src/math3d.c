@@ -1,4 +1,4 @@
-#include "math3d.h"
+#include "../include/math3d.h"
 #include <math.h>
 #include <string.h> // For memcpy
 #include <stdio.h>  // For potential error messages or debugging

@@ -1,17 +1,19 @@
-#include "renderer.h"
-#include "animation.h" // For bezier_cubic (though not used in this version of demo)
+// Two roataing soccer balls animated
+#include "../include/renderer.h" 
+#include "../include/animation.h" 
 #include <stdio.h>
 #include <math.h>
-#include <string.h>
+#include <string.h> 
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-// Main demo: Show a single soccer ball rotating on its axis AND moving in a circular path.
+// Main demo: Shows two soccer balls, different sizes, self-rotating, 
+// and moving in synced, looping circular paths using trigonometry.
 int main() {
-    int width = 600; // Slightly wider canvas
-    int height = 500;
+    int width = 900; 
+    int height = 900;
     canvas_t* canvas = canvas_create(width, height);
 
     if (!canvas) {
@@ -19,92 +21,97 @@ int main() {
         return 1;
     }
 
-    // --- Model ---
-    model_t* soccer_ball = generate_soccer_ball();
-    if (!soccer_ball) {
-        fprintf(stderr, "Failed to generate soccer_ball model.\n");
+    model_t* soccer_ball_geom = generate_soccer_ball(); 
+    if (!soccer_ball_geom) {
+        fprintf(stderr, "Failed to generate soccer_ball geometry.\n");
         canvas_destroy(canvas);
         return 1;
     }
 
-    // --- Lighting ---
     light_t lights[1];
     lights[0].type = LIGHT_TYPE_DIRECTIONAL;
-    // Light direction primarily from top-left-front
-    lights[0].direction = vec3_create_cartesian(0.5f, 0.7f, -1.0f);
+    lights[0].direction = vec3_create_cartesian(0.7f, 0.7f, -0.7f); 
     vec3_normalize(&lights[0].direction);
     int num_lights = 1;
 
-    // --- View and Projection Matrices ---
-    // Camera looking directly at the origin to center the XZ plane animation.
-    vec3_t eye = vec3_create_cartesian(0.0f, 0.0f, 7.0f); // Camera Y at 0, looking straight.
+    vec3_t eye = vec3_create_cartesian(0.0f, 0.0f, 7.5f); // Adjusted Z for new path sizes
     mat4_t view_matrix = mat4_translate(-eye.x, -eye.y, -eye.z);
-    // Removed x-axis rotation for a direct view of the origin in the screen center.
-    // mat4_t view_rot_x = mat4_rotate_x(-M_PI / 12.0f);
-    // view_matrix = mat4_multiply(&view_rot_x, &view_matrix);
-
 
     float aspect_ratio = (float)width / (float)height;
-    float fov_y_rad = M_PI / 3.0f; // ~60 degrees FOV
+    float fov_y_rad = M_PI / 3.0f; 
     float near_plane = 0.1f;
     float far_plane = 100.0f;
     mat4_t projection_matrix = mat4_perspective(fov_y_rad, aspect_ratio, near_plane, far_plane);
 
     // --- Animation Setup ---
-    int num_frames = 120; // e.g., 4 seconds at 30 FPS
-    float total_animation_duration = 4.0f; // Duration for one full loop of everything
+    int num_frames = 90; // 3 seconds at 30 FPS
+    float total_animation_duration = 3.0f; 
     float time_step = total_animation_duration / (float)num_frames;
-
     float current_time = 0.0f;
+    
+    // --- Ball 1 Parameters ---
+    mat4_t scale_matrix1 = mat4_scale(1.2f, 1.2f, 1.2f);
+    int full_rotations1 = 2; // Ball 1 will make 2 full self-rotations over 3 seconds
+    float self_rotation_speed1 = (full_rotations1 * 2.0f * M_PI) / total_animation_duration; 
+    vec3_t self_rotation_axis1 = vec3_create_cartesian(0.1f, 1.0f, 0.05f);
+    vec3_normalize(&self_rotation_axis1);
+    float circular_path_radius1 = 2.0f; // Radius of its circular path
+    float path_phase1 = 0.0f;           // Starting angle on its circular path
 
-    // Self-Rotation parameters
-    float self_rotation_speed = M_PI; // Radians per second (e.g., 180 deg/sec)
-    vec3_t self_rotation_axis = vec3_create_cartesian(0.1f, 1.0f, 0.05f); // Tilted axis
-    vec3_normalize(&self_rotation_axis);
+    // --- Ball 2 Parameters ---
+    mat4_t scale_matrix2 = mat4_scale(0.9f, 0.9f, 0.9f); 
+    int full_rotations2 = 1; // Ball 2 will make 1 full self-rotation over 3 seconds
+    float self_rotation_speed2 = (full_rotations2 * 2.0f * M_PI) / total_animation_duration; 
+    vec3_t self_rotation_axis2 = vec3_create_cartesian(1.0f, 0.5f, -0.1f);
+    vec3_normalize(&self_rotation_axis2);
+    float circular_path_radius2 = 1.2f; // Smaller circular path
+    float path_phase2 = M_PI;           // Starts on the opposite side of its path's origin compared to ball1 if radii were same
 
-    // Circular Path Translation parameters
-    float circular_path_radius = 1.8f;
-    float circular_path_period = total_animation_duration; // Path completes one loop in total_animation_duration
+    float viewport_radius = fminf(width, height) / 2.0f * 0.98f; 
+    float line_thickness = 1.0f; 
 
-    // Static scale for the soccer ball
-    mat4_t scale_matrix = mat4_scale(0.8f, 0.8f, 0.8f); // Adjusted scale
-
-    float viewport_radius = fminf(width, height) / 2.0f * 0.98f;
-    float line_thickness = 1.0f;
-
-    printf("Starting animation: %d frames (soccer ball rotating and moving in a circle)...\n", num_frames);
+    printf("Starting animation: %d frames (TWO soccer balls, trigonometric circular paths, self-rotating)...\n", num_frames);
 
     for (int frame = 0; frame < num_frames; ++frame) {
-        canvas_clear(canvas, 0.02f); // Very dark background
+        canvas_clear(canvas, 0.02f); 
         canvas_set_circular_viewport(canvas, viewport_radius);
+        
+        // --- BALL 1 ---
+        // Self-rotation
+        float current_self_rot1 = fmodf(current_time * self_rotation_speed1, 2.0f * M_PI);
+        quat_t rot_q1 = quat_from_axis_angle(self_rotation_axis1, current_self_rot1);
+        mat4_t rot_m1 = quat_to_mat4(rot_q1);
+        mat4_t base_model1 = mat4_multiply(&rot_m1, &scale_matrix1);
+        // Circular Path Translation
+        float angle_on_circle1 = fmodf(path_phase1 + (current_time / total_animation_duration) * 2.0f * M_PI, 2.0f * M_PI);
+        float path_x1 = circular_path_radius1 * cosf(angle_on_circle1);
+        float path_z1 = circular_path_radius1 * sinf(angle_on_circle1); // Path in XZ plane
+        mat4_t path_translate_m1 = mat4_translate(path_x1, 0.0f, path_z1);
+        mat4_t model_matrix1 = mat4_multiply(&path_translate_m1, &base_model1);
+        render_wireframe(canvas, soccer_ball_geom, &model_matrix1, &view_matrix, &projection_matrix, lights, num_lights, viewport_radius, line_thickness);
 
-        // 1. Calculate self-rotation
-        float current_self_rotation_angle = fmodf(current_time * self_rotation_speed, 2.0f * M_PI);
-        quat_t rotation_q = quat_from_axis_angle(self_rotation_axis, current_self_rotation_angle);
-        mat4_t rotation_m = quat_to_mat4(rotation_q);
-
-        // Base model matrix (scale then self-rotate)
-        mat4_t base_model_matrix = mat4_multiply(&rotation_m, &scale_matrix);
-
-        // 2. Calculate circular path translation
-        float angle_on_circle = fmodf((current_time / circular_path_period) * 2.0f * M_PI, 2.0f * M_PI);
-        float path_x = circular_path_radius * cosf(angle_on_circle);
-        float path_z = circular_path_radius * sinf(angle_on_circle); // Moving in XZ plane
-        // float path_y = 0.0f; // Or could add a vertical component, e.g. path_y = 0.5f * sinf(angle_on_circle * 2.0f); for a bob
-        mat4_t path_translate_m = mat4_translate(path_x, 0.0f, path_z);
-
-        // Final model matrix: Apply path translation to the (rotated and scaled) base model
-        mat4_t model_matrix = mat4_multiply(&path_translate_m, &base_model_matrix);
-
-        // Render
-        render_wireframe(canvas, soccer_ball, &model_matrix, &view_matrix, &projection_matrix, lights, num_lights, viewport_radius, line_thickness);
-
+        // --- BALL 2 ---
+        // Self-rotation
+        float current_self_rot2 = fmodf(current_time * self_rotation_speed2, 2.0f * M_PI);
+        quat_t rot_q2 = quat_from_axis_angle(self_rotation_axis2, current_self_rot2);
+        mat4_t rot_m2 = quat_to_mat4(rot_q2);
+        mat4_t base_model2 = mat4_multiply(&rot_m2, &scale_matrix2);
+        // Circular Path Translation
+        float angle_on_circle2 = fmodf(path_phase2 + (current_time / total_animation_duration) * 2.0f * M_PI, 2.0f * M_PI);
+        // To make paths distinct, Ball 2 could orbit in XY plane or a different XZ radius/center
+        // For now, also XZ plane, different radius, different phase.
+        float path_x2 = circular_path_radius2 * cosf(angle_on_circle2);
+        float path_z2 = circular_path_radius2 * sinf(angle_on_circle2); 
+        mat4_t path_translate_m2 = mat4_translate(path_x2, 0.0f, path_z2); 
+        mat4_t model_matrix2 = mat4_multiply(&path_translate_m2, &base_model2);
+        render_wireframe(canvas, soccer_ball_geom, &model_matrix2, &view_matrix, &projection_matrix, lights, num_lights, viewport_radius, line_thickness);
+        
         char frame_filename[100];
         sprintf(frame_filename, "build/frame_%04d.pgm", frame);
         if (canvas_save_to_pgm(canvas, frame_filename) != 0) {
             fprintf(stderr, "Failed to save frame %s\n", frame_filename);
         }
-
+        
         if (frame % (num_frames/10) == 0 || frame == num_frames -1) {
              printf("Rendered frame %d / %d to %s\n", frame + 1, num_frames, frame_filename);
         }
@@ -113,7 +120,8 @@ int main() {
 
     printf("Animation rendering finished. Output frames are in 'build/' directory.\n");
 
-    model_destroy(soccer_ball);
+    model_destroy(soccer_ball_geom);
     canvas_destroy(canvas);
     return 0;
 }
+

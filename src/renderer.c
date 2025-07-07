@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "../include/renderer.h"
 #include <stdlib.h> // For malloc, free, qsort
 #include <stdio.h>  // For printf (debugging)
 #include <math.h>   // For sqrtf, fabsf

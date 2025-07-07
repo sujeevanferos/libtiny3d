@@ -1,4 +1,4 @@
-#include "renderer.h" // Includes all necessary headers like math3d.h, canvas.h
+#include "../include/renderer.h" // Includes all necessary headers like math3d.h, canvas.h
 #include <stdio.h>
 #include <math.h> // For M_PI if needed
 

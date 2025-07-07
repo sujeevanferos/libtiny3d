@@ -1,5 +1,5 @@
-#include "canvas.h"   // For canvas operations
-#include "math3d.h"   // For M_PI and math functions like cosf, sinf (though standard math.h is also fine)
+#include "../include/canvas.h" // For canvas operations
+#include "../include/math3d.h" // For M_PI
 #include <stdio.h>    // For printf, fprintf
 #include <math.h>     // For M_PI (ensure it's available), cosf, sinf, fminf
 

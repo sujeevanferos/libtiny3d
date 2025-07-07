@@ -1,7 +1,7 @@
-#include "math3d.h"
+#include "../include/math3d.h"
 #include <stdio.h>
 #include <math.h> // For M_PI if available, and other math functions
-#include "canvas.h" // For PGM output
+#include "../include/canvas.h" // For PGM output
 // Note: stdio.h and math.h were already included above, removing redundant includes.
 
 #ifndef M_PI
@@ -78,20 +78,20 @@ int main() {
 
     printf("\n--- Matrix & Transformation Tests ---\n");
     // 3. Create transformation matrices
-    mat4_t scale_matrix = mat4_scale(0.5f, 0.5f, 0.5f); // Scale by 0.5
+    mat4_t scale_matrix = mat4_scale(2.0f, 2.0f, 2.0f); // Scale by 2.0
     // print_mat4("Scale Matrix", &scale_matrix); // Reduced verbosity for this version
 
-    mat4_t rotation_matrix = mat4_rotate_xyz(M_PI / 4.0f, M_PI / 4.0f, 0.0f); // Rotate 45 deg around X, then 45 deg around Y
+    mat4_t rotation_matrix = mat4_rotate_xyz(M_PI / 4.0f, M_PI / 6.0f, 0.0f); // Rotate 45 deg around X, then 30 deg around Y
     // print_mat4("Rotation Matrix", &rotation_matrix);
 
-    mat4_t translation_matrix = mat4_translate(0.0f, 0.0f, -5.0f); // Move 5 units away from camera (into -Z)
+    mat4_t translation_matrix = mat4_translate(0.0f, 0.0f, -8.0f); // Move 8 units away from camera (into -Z)
     // print_mat4("Translation Matrix", &translation_matrix);
 
     mat4_t model_matrix_rs = mat4_multiply(&rotation_matrix, &scale_matrix);
     mat4_t model_matrix = mat4_multiply(&translation_matrix, &model_matrix_rs);
     // print_mat4("Model Matrix (T*R*S)", &model_matrix);
 
-    mat4_t projection_matrix = mat4_perspective(M_PI / 2.0f, 1.0f, 1.0f, 100.0f); // 90deg FOV, 1:1 aspect, near=1, far=100
+    mat4_t projection_matrix = mat4_perspective(M_PI / 2.0f, 1.0f, 2.0f, 100.0f); // 90deg FOV, 1:1 aspect, near=1, far=100
     // print_mat4("Projection Matrix", &projection_matrix);
     
     mat4_t mvp_matrix = mat4_multiply(&projection_matrix, &model_matrix);
@@ -121,8 +121,8 @@ int main() {
     print_mat4("Matrix from SLERP'd Quaternion (45 deg rot around Y)", &rot_from_slerp_quat);
 
     printf("\n--- Visualizing Transformed Cube ---");
-    int canvas_width = 300;
-    int canvas_height = 200;
+    int canvas_width = 900;
+    int canvas_height = 900;
     canvas_t* viz_canvas = canvas_create(canvas_width, canvas_height);
     if (!viz_canvas) {
         fprintf(stderr, "Failed to create canvas for cube visualization.\n");

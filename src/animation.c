@@ -1,4 +1,4 @@
-#include "animation.h"
+#include "../include/animation.h"
 #include <math.h> // For powf if used, though direct expansion is better
 
 vec3_t bezier_cubic(vec3_t p0, vec3_t p1, vec3_t p2, vec3_t p3, float t) {
