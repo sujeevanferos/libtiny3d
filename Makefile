@@ -22,7 +22,7 @@ DEMO_MAIN_SRC = $(DEMO_DIR)/main.c
 DEMO_MAIN_OBJ = $(BUILD_DIR)/main_demo.o # Specific name for demo's main object
 DEMO_TARGET = $(BUILD_DIR)/demo
 
-# Default target: build library and demo
+# Default target: build library and demo (multiple animated objects)
 all: $(LIB_TARGET) $(DEMO_TARGET)
 
 # Rule to build the static library
@@ -102,7 +102,6 @@ $(TEST_TASK1_CLOCK_TARGET): $(TEST_TASK1_CLOCK_OBJ) $(LIB_TARGET)
 $(TEST_TASK1_CLOCK_OBJ): $(TEST_TASK1_CLOCK_SRC) $(INCLUDE_DIR)/canvas.h $(INCLUDE_DIR)/math3d.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $(TEST_TASK1_CLOCK_SRC) -o $(TEST_TASK1_CLOCK_OBJ)
 
-
 # Phony targets
 .PHONY: all clean run_demo run_test_math run_test_pipeline run_test_task1_clock tests
 
@@ -129,6 +128,30 @@ run_test_pipeline: $(TEST_PIPELINE_TARGET)
 run_test_task1_clock: $(TEST_TASK1_CLOCK_TARGET)
 	./$(TEST_TASK1_CLOCK_TARGET)
 	@echo "Task 1 clock test executed. Check for build/task1_clock_output.pgm"
+
+# === Task 3: Rotating Soccer Ball ===
+
+ROTATING_SOCCER_SRC = demo/rotating_soccer_ball/main.c
+ROTATING_SOCCER_OBJ = $(BUILD_DIR)/main_rotating_soccer.o
+ROTATING_SOCCER_EXE = $(BUILD_DIR)/rotating_soccer_ball
+
+# Rule to compile the soccer main.c file into an object file
+$(ROTATING_SOCCER_OBJ): $(ROTATING_SOCCER_SRC) $(INCLUDE_DIR)/canvas.h $(INCLUDE_DIR)/renderer.h $(INCLUDE_DIR)/animation.h $(INCLUDE_DIR)/obj_loader.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $(ROTATING_SOCCER_SRC) -o $(ROTATING_SOCCER_OBJ)
+
+# Rule to link the soccer executable
+$(ROTATING_SOCCER_EXE): $(ROTATING_SOCCER_OBJ) $(LIB_TARGET)
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(ROTATING_SOCCER_OBJ) -L$(BUILD_DIR) -ltiny3d $(LDFLAGS) -o $@
+	@echo "Successfully built Task 3: rotating_soccer_ball"
+
+# Run target
+.PHONY: run_test_task3_soccer
+run_test_task3_soccer: $(ROTATING_SOCCER_EXE)
+	./$(ROTATING_SOCCER_EXE)
+	@echo "Rotating soccer ball test executed. Check output if applicable."
+
+	
 
 # Target to clean build artifacts
 clean:

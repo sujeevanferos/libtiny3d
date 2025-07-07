@@ -1,6 +1,6 @@
 // Rotating soccer ball clipped to a circle
-#include "../include/renderer.h"
-#include "../include/animation.h" // For bezier_cubic
+#include "../../include/renderer.h"
+#include "../../include/animation.h" // For bezier_cubic
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -101,7 +101,7 @@ int main() {
         render_wireframe(canvas, soccer_ball, &model_matrix, &view_matrix, &projection_matrix, lights, num_lights, viewport_radius, line_thickness);
 
         char frame_filename[100];
-        sprintf(frame_filename, "build/frame_%04d.pgm", frame);
+        sprintf(frame_filename, "build/soccer_%04d.pgm", frame);
         if (canvas_save_to_pgm(canvas, frame_filename) != 0) {
             fprintf(stderr, "Failed to save frame %s\n", frame_filename);
         }

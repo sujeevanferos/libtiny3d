@@ -37,19 +37,27 @@ make clean
 make run_test_math
 convert build/task2_math_cube_output.pgm tests/visual_tests/cube.png
 ```
+The `.png` format of the output is stored in `tests/visual_tests/cube.png`
 
-## Building the Demo - Rotating Soccer Ball model
-The shape will be shown in the `tests/visual_tests` folder as `clock_output.png`
+## Task 3 - Rotating Soccer Ball shape clipped to circular paths
+```bash
+make clean
+make run_test_task3_soccer
+ffmpeg -framerate 30 -i build/soccer_%04d.pgm -vf scale=512:512 tests/visual_tests/rotating_soccer.mp4
+```
+The output of the task is saved at `tests/visual_tests/rotating_soccer_ball_clipped_to_circular_path.mp4`
+
+## Task 4 - Multiple animated objects
+The shape will be shown in the `tests/visual_tests/multiple_objects_animated.mp4` path
 
 To build and run the main demo:
 ```bash
 make clean
-make
-./build/demo
+make run_demo
 ```
 This will generate `frame_xxxx.pgm` files in the `build/` directory. To get the `.mp4` version of the `Roatating Soccer Ball` model
 ```bash
-ffmpeg -framerate 30 -i build/frame_%04d.pgm -vf scale=512:512 tests/visual_tests/output.mp4
+ffmpeg -framerate 30 -i build/frame_%04d.pgm -vf scale=512:512 tests/visual_tests/multiple_objects_animated.mp4
 ```
 All images and video outputs can be found in `tests/visual_tests`
 
